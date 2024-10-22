@@ -21,6 +21,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         UserDefaults.standard.set("ViewController", forKey: "lastControllerName")
+        
+        UserDefaults.standard.set("", forKey: "username")
         self.title = "Login"
         ViewManager.shared.addGradient(to: self.view, colors: [UIColor(hex: "#6CB1A2")!,UIColor(hex:"#4D70A4")!])
         

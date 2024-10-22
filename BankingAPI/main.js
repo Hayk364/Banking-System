@@ -66,6 +66,31 @@ app.post('/api/users/findName', async (req,res) => {
     }
 })
 
+app.post('/api/users/getCard',async (req,res) => {
+    try {
+        let userCard = {}
+        const name = req.body.username
+        const cards = await db.collection("card").find().toArray()
+        for(let card of cards){
+            if(card.username == name){
+                userCard = {
+                    _id:null,
+                    number:card.number,
+                    cvv:card.cvv,
+                    username:null,
+                    cardname:card.cardname,
+                    date:card.date,
+                    balance:card.balance
+                }
+                break;
+            }
+        }
+        res.json(userCard)
+    } catch (error) {
+        console.error(error)
+    }
+})
+
 app.post('/api/users/addCard',async (req,res) => {
     try {
         const newCard = {
@@ -73,7 +98,8 @@ app.post('/api/users/addCard',async (req,res) => {
             cvv:req.body.cvv,
             username:req.body.username,
             cardname:req.body.cardname,
-            date:req.body.date
+            date:req.body.date,
+            balance:req.body.balance
         }
         const result = await db.collection('card').insertOne(newCard)
         console.log(result)

@@ -30,7 +30,6 @@ class AddCardViewController: UIViewController {
     var timer:Timer?
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         ViewManager.shared.addGradient(to: self.view, colors: [UIColor(hex: "#6CB1A2")!,UIColor(hex:"#4D70A4")!])
         
         setupAddCardButton()

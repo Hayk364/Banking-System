@@ -12,7 +12,34 @@ final class Model {
     static let shared = Model()
     private let baseURL = "http://192.168.10.12:5001/api/users"
     
-    
+    final func GetCard(username:String,complition:@escaping (Result<CardForBalance,Error>) -> Void){
+        DispatchQueue.global(qos: .userInteractive).async {
+            guard let url = URL(string: self.baseURL + "/getCard") else { return }
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            do{
+                let jsonData = try JSONEncoder().encode(["username":username])
+                request.httpBody = jsonData
+                let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                    if let error{
+                        complition(.failure(error))
+                    }
+                    guard let data else { return }
+                    do{
+                        let card = try JSONDecoder().decode(CardForBalance.self, from: data)
+                        complition(.success(card))
+                    }catch{
+                        complition(.failure(error))
+                    }
+                }
+                task.resume()
+            }
+            catch{
+                complition(.failure(error))
+            }
+        }
+    }
     final func SignUp(user: User,complition:@escaping (Result<Bool,Error>) -> Void){
         DispatchQueue.global(qos: .userInteractive).async {
             self.FindName(name: user.name) { result in
@@ -122,7 +149,7 @@ final class Model {
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             do{
-                let jsonData = try JSONEncoder().encode(card)
+                let jsonData = try JSONEncoder().encode(CardForBalance(id: nil, number: card.number, username: card.username, cardname: card.cardname, cvv: card.cvv, date: card.date, balance: 5000.0))
                 request.httpBody = jsonData
                 let task = URLSession.shared.dataTask(with: request) { data, response, error in
                     if let error{

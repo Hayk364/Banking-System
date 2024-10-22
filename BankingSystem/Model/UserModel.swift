@@ -44,3 +44,22 @@ struct Card: Decodable,Encodable{
         case date
     }
 }
+struct CardForBalance: Decodable,Encodable{
+    let id: String?
+    let number:String?
+    let username:String?
+    let cardname:String?
+    let cvv:String?
+    let date:String?
+    let balance:Float?
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case number
+        case username
+        case cardname
+        case cvv
+        case date
+        case balance
+    }
+}
