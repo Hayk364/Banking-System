@@ -12,6 +12,8 @@ class ViewController: UIViewController {
     
     var alertForError:UIAlertController?
     
+    var activity = UIActivityIndicatorView(style: .large)
+    
     var xView = UIImageView()
     var facebookView = UIImageView()
     var instagramView = UIImageView()
@@ -168,19 +170,22 @@ class ViewController: UIViewController {
     }
     @objc func Login(){
         print("Login")
-        Model.shared.Login(user: User(_id: nil, number: nil, name: self.textFieldName.text!, password: self.textFieldPassword.text!)) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let login):
-                    if login{
-                        UserDefaults.standard.set(self.textFieldName.text, forKey: "username")
-                        self.navigationController?.viewControllers = [HomeViewController()]
+        self.setupActivity { activity in
+            activity.startAnimating()
+            Model.shared.Login(user: User(_id: nil, number: nil, name: self.textFieldName.text!, password: self.textFieldPassword.text!)) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let login):
+                        if login{
+                            UserDefaults.standard.set(self.textFieldName.text, forKey: "username")
+                            self.navigationController?.viewControllers = [HomeViewController()]
+                        }
+                        else{
+                            self.createAlertForError(String(login))
+                        }
+                    case .failure(let error):
+                        self.createAlertForError(error.localizedDescription)
                     }
-                    else{
-                        self.createAlertForError(String(login))
-                    }
-                case .failure(let error):
-                    self.createAlertForError(error.localizedDescription)
                 }
             }
         }
@@ -245,5 +250,11 @@ class ViewController: UIViewController {
         alertForError?.addAction(action1)
         
         self.present(self.alertForError!, animated: true)
+    }
+    func setupActivity(complition:@escaping (UIActivityIndicatorView) -> Void){
+        self.activity.color = .white
+        self.activity.center = self.view.center
+        self.view.addSubview(self.activity)
+        complition(self.activity)
     }
 }

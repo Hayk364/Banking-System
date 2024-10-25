@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb')
+const { MongoClient, Double } = require('mongodb')
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
@@ -6,7 +6,7 @@ const crypto = require('crypto')
 const { encrypt,decrypt } = require('./back')
 
 const PORT = 5001
-const HOST = "192.168.10.12"
+const HOST = "192.168.10.10"
 const app = express()
 
 let globalKey;
@@ -63,6 +63,39 @@ app.post('/api/users/findName', async (req,res) => {
         res.json(isFind)
     } catch (error) {
         
+    }
+})
+
+app.post('/api/users/add-balance',async (req,res) => {
+    try {
+        let balance = 0.0
+        const username = req.body.username
+        const amount = req.body.amount
+        const result = await db.collection('card').find().toArray()
+        for(let card of result){
+            if(card.username == username){
+                card.balance += amount
+                balance = card.balance
+                break
+            }
+        }
+        const changeBalance = await db.collection('card').updateOne(
+            {username: username},
+            {$set:{balance:balance}}
+        )
+        res.json(balance)
+    } catch (error) {
+        console.error(error)
+    }
+})
+
+app.post('/api/users/get-balance',async (req,res) => {
+    try {
+        const username = req.body.username
+        const result = await db.collection('card').findOne({username})
+        res.json(result.balance)
+    } catch (error) {
+        console.error(error)
     }
 })
 

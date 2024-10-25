@@ -63,3 +63,13 @@ struct CardForBalance: Decodable,Encodable{
         case balance
     }
 }
+
+struct AddData:Decodable,Encodable{
+    let username:String?
+    let amount:Double?
+    
+    enum CodingKeys:String,CodingKey{
+        case username
+        case amount
+    }
+}
