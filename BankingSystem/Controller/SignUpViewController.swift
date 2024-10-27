@@ -200,7 +200,7 @@ class SignUpViewController: UIViewController {
                     }
                     else {
                         UserDefaults.standard.set(self.textFieldName.text, forKey: "username")
-                        Model.shared.SignUp(user: User(_id:nil,number: nil,name: self.textFieldName.text!, password: self.textFieldPassword.text!)) { result in
+                        Model.shared.SignUp(user: User(_id:nil,number: self.textFieldForNumber.text!,name: self.textFieldName.text!, password: self.textFieldPassword.text!)) { result in
                             DispatchQueue.main.async {
                                 
                                 switch result {

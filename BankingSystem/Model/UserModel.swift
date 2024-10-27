@@ -52,6 +52,8 @@ struct CardForBalance: Decodable,Encodable{
     let cvv:String?
     let date:String?
     let balance:Float?
+    let key:String?
+    let status:String?
     
     enum CodingKeys: String, CodingKey {
         case id = "_id"
@@ -61,6 +63,8 @@ struct CardForBalance: Decodable,Encodable{
         case cvv
         case date
         case balance
+        case key
+        case status
     }
 }
 
@@ -71,5 +75,17 @@ struct AddData:Decodable,Encodable{
     enum CodingKeys:String,CodingKey{
         case username
         case amount
+    }
+}
+
+struct SendMoney:Decodable,Encodable{
+    let username:String?
+    let amount:Double?
+    let senduserkey:String?
+    
+    enum CodingKeys:String,CodingKey{
+        case username
+        case amount
+        case senduserkey
     }
 }

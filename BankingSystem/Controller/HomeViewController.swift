@@ -15,7 +15,10 @@ class HomeViewController: UIViewController {
     var cardNameForCard = UILabel()
     var usernameForCard = UILabel()
     var balance = UILabel()
+    var key = UILabel()
+    var textCopyed = UILabel()
     
+    var copyTextButton = UIButton()
     var logoutButton = UIButton()
     var addBalanceButton = UIButton()
     var sendMoneyButton = UIButton()
@@ -27,6 +30,7 @@ class HomeViewController: UIViewController {
     
     var viewCard = UIView()
     
+    var timer:Timer?
     override func viewDidLoad() {
         super.viewDidLoad()
         ViewManager.shared.addGradient(to: self.view, colors: [UIColor(hex: "#6CB1A2")!,UIColor(hex:"#4D70A4")!])
@@ -36,6 +40,18 @@ class HomeViewController: UIViewController {
         setupSendMoneyButton()
         setupCardView()
         setupLogoutButton()
+        setupCopyTextButton()
+    }
+    
+    func isTextCopy(isCopy:Bool){
+        if isCopy{
+            UIView.animate(withDuration: 1.7) {
+                self.textCopyed.alpha = 1.0
+            }
+            UIView.animate(withDuration: 0.7) {
+                self.textCopyed.alpha = 0.0
+            }
+        }
     }
     func updateBalance(){
         Model.shared.getBalance(username: UserDefaults.standard.string(forKey: "username")) { result in
@@ -71,6 +87,11 @@ class HomeViewController: UIViewController {
             self.viewCard.widthAnchor.constraint(equalToConstant: 370),
             self.viewCard.heightAnchor.constraint(equalToConstant: 220)
         ])
+        
+        self.textCopyed.text = "Text Copyed"
+        self.textCopyed.frame = CGRect(x: self.view.center.x - 50, y: self.view.center.y - 60, width: 100, height: 40)
+        self.textCopyed.alpha = 0.0
+        self.view.addSubview(self.textCopyed)
     }
     func createCard(){
         var bal:Float?
@@ -85,6 +106,7 @@ class HomeViewController: UIViewController {
                     self.cardNameForCard.text = userCard.cardname
                     self.secureCodeForCard.text = userCard.cvv
                     self.dateForCard.text = userCard.date
+                    self.key.text = userCard.key
                     self.balance.text = "Balance: \(userCard.balance!)"
                     bal = userCard.balance!
                     print(bal!)
@@ -102,6 +124,9 @@ class HomeViewController: UIViewController {
         self.balance.frame = CGRect(x: self.viewCard.center.x + 200, y: self.viewCard.center.y + 110, width: 200, height: 50)
         self.viewCard.addSubview(self.balance)
         
+        self.key.frame = CGRect(x: self.view.center.x / 4 - 20, y: self.view.center.y - 150, width: 350, height: 50)
+        self.view.addSubview(self.key)
+        
         self.numberForCard.frame = CGRect(x: self.viewCard.center.x + 10, y: self.viewCard.center.y, width: 200, height: 60)
         self.viewCard.addSubview(self.numberForCard)
         
@@ -113,6 +138,10 @@ class HomeViewController: UIViewController {
         
         self.cardNameForCard.frame = CGRect(x: self.viewCard.center.x + 10, y: self.viewCard.center.y + 160, width: 200, height: 50)
         self.viewCard.addSubview(self.cardNameForCard)
+    }
+    @objc func CopyText(){
+        UIPasteboard.general.string = self.key.text
+        self.isTextCopy(isCopy: true)
     }
     
     func setupLogoutButton(){
@@ -132,6 +161,21 @@ class HomeViewController: UIViewController {
     @objc func LogOut(){
         self.navigationController?.viewControllers = [ViewController()]
     }
+    func setupCopyTextButton(){
+        self.copyTextButton.setTitle("Copy Key", for: .normal)
+        self.copyTextButton.translatesAutoresizingMaskIntoConstraints = false
+        self.copyTextButton.backgroundColor = .blue
+        self.copyTextButton.addTarget(self, action: #selector(CopyText), for: .touchUpInside)
+        self.copyTextButton.layer.cornerRadius = 20
+        self.view.addSubview(self.copyTextButton)
+        NSLayoutConstraint.activate([
+            self.copyTextButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            self.copyTextButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor,constant: -80),
+            self.copyTextButton.widthAnchor.constraint(equalToConstant: 100),
+            self.copyTextButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
     func setupAddBalanceButton(){
         self.addBalanceButton.setTitle("Add Balance", for: .normal)
         self.addBalanceButton.backgroundColor = .blue
@@ -194,6 +238,33 @@ class HomeViewController: UIViewController {
         ])
     }
     @objc func SendMoney(){
-        print("Send")
+        var amount:Double?
+        self.alertFortSendMoney = UIAlertController(title: "Send Money", message: "Commision: 10%", preferredStyle: .alert)
+        self.alertFortSendMoney.addTextField { textFieldAmount in
+            textFieldAmount.placeholder = "Amount"
+            textFieldAmount.keyboardType = .numberPad
+        }
+        self.alertFortSendMoney.addTextField { textFieldKey in
+            textFieldKey.placeholder = "Key"
+        }
+        let actionCancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        let actionSend = UIAlertAction(title: "Send", style: .default) { _ in
+            if let textFieldForAmount = self.alertFortSendMoney.textFields?.first, let textFieldForKey = self.alertFortSendMoney.textFields?.last{
+                amount = Double(textFieldForAmount.text!)
+                let key = textFieldForKey.text!
+                Model.shared.SendMoney(username: UserDefaults.standard.string(forKey: "username"), senduserkey: key, amount: amount) { result in
+                    switch result {
+                    case .success(let isSend):
+                        print(isSend)
+                        self.updateBalance()
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    }
+                }
+            }
+        }
+        self.alertFortSendMoney.addAction(actionCancel)
+        self.alertFortSendMoney.addAction(actionSend)
+        self.present(self.alertFortSendMoney, animated: true)
     }
 }
