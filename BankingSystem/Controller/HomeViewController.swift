@@ -22,6 +22,7 @@ class HomeViewController: UIViewController {
     var logoutButton = UIButton()
     var addBalanceButton = UIButton()
     var sendMoneyButton = UIButton()
+    var transactionHistoryButton = UIButton()
     
     var alertForAddBalance = UIAlertController()
     var alertFortSendMoney = UIAlertController()
@@ -41,6 +42,10 @@ class HomeViewController: UIViewController {
         setupCardView()
         setupLogoutButton()
         setupCopyTextButton()
+        setupTrasactionHistoryButton()
+        DispatchQueue.main.async {
+            self.timer = Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(self.updateBalance), userInfo: nil, repeats: true)
+        }
     }
     
     func isTextCopy(isCopy:Bool){
@@ -53,7 +58,7 @@ class HomeViewController: UIViewController {
             }
         }
     }
-    func updateBalance(){
+    @objc func updateBalance(){
         Model.shared.getBalance(username: UserDefaults.standard.string(forKey: "username")) { result in
             DispatchQueue.main.async {
                 switch result {
@@ -266,5 +271,22 @@ class HomeViewController: UIViewController {
         self.alertFortSendMoney.addAction(actionCancel)
         self.alertFortSendMoney.addAction(actionSend)
         self.present(self.alertFortSendMoney, animated: true)
+    }
+    func setupTrasactionHistoryButton() {
+        self.transactionHistoryButton.setTitle("My Transaction History", for: .normal)
+        self.transactionHistoryButton.backgroundColor = .blue
+        self.transactionHistoryButton.translatesAutoresizingMaskIntoConstraints = false
+        self.transactionHistoryButton.addTarget(self, action: #selector(TransactionHistory), for: .touchUpInside)
+        self.transactionHistoryButton.layer.cornerRadius = 20
+        self.view.addSubview(self.transactionHistoryButton)
+        NSLayoutConstraint.activate([
+            self.transactionHistoryButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            self.transactionHistoryButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor,constant: 210),
+            self.transactionHistoryButton.widthAnchor.constraint(equalToConstant: 200),
+            self.transactionHistoryButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    @objc func TransactionHistory(){
+        self.navigationController?.pushViewController(TrasactionHistoryViewController(), animated: true)
     }
 }

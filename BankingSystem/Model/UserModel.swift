@@ -89,3 +89,17 @@ struct SendMoney:Decodable,Encodable{
         case senduserkey
     }
 }
+
+struct Transaction:Decodable,Encodable{
+    let id:String?
+    let sendername:String?
+    let recipient:String?
+    let amount:Double?
+    
+    enum CodingKeys:String,CodingKey{
+        case id = "_id"
+        case sendername
+        case recipient
+        case amount
+    }
+}

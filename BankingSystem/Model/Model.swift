@@ -69,6 +69,36 @@ final class Model {
             }
         }
     }
+    final func GetTrasnaction(username:String?,complition:@escaping (Result<[Transaction],Error>) -> Void){
+        guard let url = URL(string: "http://192.168.10.10:5001/api/users/getTransaction") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        do{
+            let jsonData = try JSONEncoder().encode(["username":username])
+            request.httpBody = jsonData
+            let task = URLSession.shared.dataTask(with: request) {  data,response, error in
+                if let error = error {
+                    complition(.failure(error))
+                    return
+                }
+                if let httpResponse = response as? HTTPURLResponse,httpResponse.statusCode != 200{
+                    complition(.failure(httpResponse.statusCode.description as! Error))
+                }
+                guard let data else { return }
+                do{
+                    let dataBases = try JSONDecoder().decode([Transaction].self, from: data)
+                    complition(.success(dataBases))
+                }catch{
+                    complition(.failure(error))
+                }
+            }
+            task.resume()
+        }
+        catch{
+            complition(.failure(error))
+        }
+    }
     final func AddBalance(amount:Double?,username:String?,complition:@escaping (Result<Double,Error>) -> Void){
         DispatchQueue.global(qos: .userInteractive).async{
             guard let url = URL(string: self.baseURL + "/add-balance") else { return }

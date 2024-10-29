@@ -117,6 +117,7 @@ app.post('/api/users/send-money',async (req,res) => {
                     {$set: {balance: bank.balance+isThenProcent}}
                 )
                 isSend = true
+                const addTransaction = await db.collection("transaction").insertOne({sendername:sender.username,recipient:taker.username,amount:data.amount})
             }
             else{
                 isSend = false
@@ -216,14 +217,16 @@ app.post('/api/users',async (req,res) => {
     }
 })
 
-app.get("/get",async (req,res) =>{
+app.post("/api/users/getTransaction",async (req,res) =>{
     try {
-        const coll = await db.collection("card").find().toArray()
-        for(let card of coll){
-            console.log(card)
-        }
+        const username = req.body.username
+        const userIsSender = await db.collection("transaction").find({sendername:username}).toArray()
+        const userIsRecipient = await db.collection("transaction").find({recipient:username}).toArray() 
+        let data = userIsRecipient.concat(userIsSender)
+        res.json(data)
     } catch (error) {
-        
+        console.error(error)
+        res.status(500).json({ error: "Internal Server Error" }); 
     }
 })
 
